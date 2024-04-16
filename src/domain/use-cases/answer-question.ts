@@ -1,3 +1,4 @@
+import { UniqueEntityId } from "../../core/entities/unique-entity-id";
 import { Answer } from "../entities/answer";
 import { AnswersRepository } from "../repositories/answers-repository";
 
@@ -14,10 +15,10 @@ export class AnswerQuestionUseCase {
     }
 
     async execute({ instructorId, questionId, content }: AnswerQuestionUseCaseRequest) {
-        const anwser = new Answer({
-            authorId: instructorId,
-            questionId,
-            content
+        const anwser = Answer.create({
+            content,
+            authorId: new UniqueEntityId(instructorId),
+            questionId: new UniqueEntityId(questionId),
         })
 
         await this.answersRepository.create(anwser)
