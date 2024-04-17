@@ -1,23 +1,23 @@
-import { Question } from '../../enterprise/entities/question'
-import { QuestionsRepository } from '../repositories/questions-repository'
+import { InMemoryQuestionsRepository } from 'test/repositories/in-memory-questions-repository'
 import { CreateQuestionUseCase } from './create-question'
 
-const fakeQuestionRepository: QuestionsRepository = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  create: async (question: Question) => {},
-}
+let inMemoryQuestionsRepository: InMemoryQuestionsRepository
+let sut: CreateQuestionUseCase
 
-test('create a question', async () => {
-  const createQuestionUseCase = new CreateQuestionUseCase(
-    fakeQuestionRepository,
-  )
-
-  const { question } = await createQuestionUseCase.execute({
-    authorId: '1',
-    title: 'New question',
-    content: 'New content',
+describe('Create Question Use Case', async () => {
+  beforeEach(() => {
+    inMemoryQuestionsRepository = new InMemoryQuestionsRepository()
+    sut = new CreateQuestionUseCase(inMemoryQuestionsRepository)
   })
 
-  expect(question.id).toBeTruthy()
-  expect(question.title).toEqual('New question')
+  it('should be able create a question', async () => {
+    const { question } = await sut.execute({
+      authorId: '1',
+      title: 'New question',
+      content: 'New content',
+    })
+
+    expect(question.id).toBeTruthy()
+    expect(question.title).toEqual('New question')
+  })
 })
