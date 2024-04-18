@@ -8,6 +8,11 @@ export class InMemoryAnswersRepository implements AnswersRepository {
     return this.items.find((answer) => answer.id.toString() === id) || null
   }
 
+  async save(answer: Answer) {
+    const answerIndex = this.items.findIndex((item) => item.id === answer.id)
+    this.items[answerIndex] = answer
+  }
+
   async create(answer: Answer) {
     this.items.push(answer)
   }
