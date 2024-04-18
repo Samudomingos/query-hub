@@ -1,5 +1,3 @@
-import { makeQuestion } from 'test/factories/make-question'
-
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { DeleteQuestionCommentUseCase } from './delete-question-comment'
 import { InMemoryQuestionCommentsRepository } from 'test/repositories/in-memory-question-comments-repository'
