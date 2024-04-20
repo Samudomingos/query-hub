@@ -1,14 +1,19 @@
 import { Either, left, right } from '@/core/either'
-import { Question } from '../../enterprise/entities/question'
+import { Question, QuestionProps } from '../../enterprise/entities/question'
 import { QuestionsRepository } from '../repositories/questions-repository'
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
 import { NotAllowedError } from './errors/not-allowed-error'
+import { QuestionAttachmentsRepository } from '../repositories/question-attachments-repository'
+import { QuestionAttachmentList } from '../../enterprise/entities/question-attachment-list'
+import { QuestionAttachment } from '../../enterprise/entities/question-attachment'
+import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 
 interface EditQuestionUseCaseRequest {
   questionId: string
   authorId: string
   title: string
   content: string
+  attachmentsIds: string[]
 }
 
 type EditQuestionUseCaseResponse = Either<
@@ -19,13 +24,17 @@ type EditQuestionUseCaseResponse = Either<
 >
 
 export class EditQuestionUseCase {
-  constructor(private questionsRepository: QuestionsRepository) {}
+  constructor(
+    private questionsRepository: QuestionsRepository,
+    private questionAttachmentsRepository: QuestionAttachmentsRepository,
+  ) {}
 
   async execute({
     questionId,
     authorId,
     title,
     content,
+    attachmentsIds,
   }: EditQuestionUseCaseRequest): Promise<EditQuestionUseCaseResponse> {
     const question = await this.questionsRepository.findById(questionId)
 
@@ -37,7 +46,27 @@ export class EditQuestionUseCase {
       return left(new NotAllowedError())
     }
 
-    Object.assign(question, { title, content })
+    const currentQuestionAttachments =
+      await this.questionAttachmentsRepository.findManyByQuestionId(questionId)
+
+    const questionAttachmentList = new QuestionAttachmentList(
+      currentQuestionAttachments,
+    )
+
+    const questionAttachments = attachmentsIds.map((attachmentId) => {
+      return QuestionAttachment.create({
+        attachmentId: new UniqueEntityId(attachmentId),
+        questionId: question.id,
+      })
+    })
+
+    questionAttachmentList.update(questionAttachments)
+
+    Object.assign(question, {
+      title,
+      content,
+      attachments: questionAttachmentList,
+    } as QuestionProps)
 
     await this.questionsRepository.save(question)
 
