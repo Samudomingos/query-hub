@@ -74,6 +74,7 @@ export class Question extends AggregateRoot<QuestionProps> {
 
   set attachments(value: QuestionAttachmentList) {
     this.props.attachments = value
+    this.touch()
   }
 
   set bestAnswerId(value: UniqueEntityId | undefined) {
